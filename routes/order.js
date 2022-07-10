@@ -1,14 +1,15 @@
 const express=require('express')
 const router=express.Router()
+const { canCreateOrder,canUpdateOrder,viewStatus} = require('../permissions')
 
 
 // Load User model
-const Order = require("../../models/Order");
+const Order = require("../models/order");
 
-router.post('/createOrder',(req,res)=>
+router.post('/createOrder',authGetOrder,async (req,res)=>
 {
     try {
-        const order = await Task.findOne({ orderID:req.body.orderID })
+        const order = await Order.findOne({ orderID:req.body.orderID })
         if (order) {
             return res.status(404).send("Order already exists")
         }
@@ -22,9 +23,8 @@ router.post('/createOrder',(req,res)=>
     }
 });
 
-router.post('/updateOrderStatus',(req,res)=>
+router.post('/updateOrderStatus',authUpdateOrder,(req,res)=>
 {
-
 Order.findOneAndUpdate({orderID: req.body.orderID}, 
         {orderStatus:req.body.orderStatus}, null, function (err, docs) {
         if (err){
@@ -36,7 +36,7 @@ Order.findOneAndUpdate({orderID: req.body.orderID},
     });
 })
     
-router.get('/getOrderStatus',(req,res)=>
+router.get('/getOrderStatus',authStatusOfOrder,(req,res)=>
 {
    
     Order.find({orderID: req.body.orderID})
@@ -51,10 +51,33 @@ router.get('/getOrderStatus',(req,res)=>
     
 
     
-
+function authGetOrder(req, res, next) {
+    if (!canCreateOrder(req.body.role)) {
+      res.status(401)
+      return res.send('Not Allowed')
+    }
+  
+    next()
+  }
    
-
-
+  function authUpdateOrder(req, res, next) {
+    if (!canUpdateOrder(req.body.role)) {
+      res.status(401)
+      return res.send('Not Allowed')
+    }
+  
+    next()
+  }
+  
+  function authStatusOfOrder(req, res, next) {
+    if (!viewStatus(req.body.role)) {
+      res.status(401)
+      return res.send('Not Allowed')
+    }
+  
+    next()
+  }
+  module.exports = router;
 
 
 
