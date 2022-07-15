@@ -2,13 +2,15 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const bcrypt = require("bcryptjs");
 const jwt = require('jsonwebtoken')
+const config=require('../helper/config')
 
 
 var validateField = function(variable) {
     var re = /^(?:\d{10}|\w+@\w+\.\w{2,3})$/;
     return re.test(variable)
 };
-//create Schema
+// create UserSchema using mongoose schema
+
 const UserSchema = new Schema({
     name: {
         type: String,
@@ -55,7 +57,7 @@ const UserSchema = new Schema({
 
 });
 
-
+// find user in the user db
 UserSchema.statics.findByCredentials = async (userID, password) => {
     const user = await User.findOne({
         userID
@@ -74,16 +76,17 @@ UserSchema.statics.findByCredentials = async (userID, password) => {
     return user
 }
 
+// genearte jwt token and concat to existing document
 UserSchema.methods.generateAuthToken = async function () {
     const user = this
-    const token = jwt.sign({ _id: user._id.toString() }, 'thisismynewcourse')
+    const token = jwt.sign({ _id: user._id.toString() }, config.secretKey)
     user.tokens = user.tokens.concat({ token })
     await user.save()
 
     return token
 }
 
-// Hash the plain text password before saving
+// hash the plain text password before saving
 UserSchema.pre('save', async function(next) {
     const user = this
 
@@ -95,5 +98,5 @@ UserSchema.pre('save', async function(next) {
 })
 
 
-
+//set and export the schema in mongoose model
 module.exports = User = mongoose.model("User", UserSchema);

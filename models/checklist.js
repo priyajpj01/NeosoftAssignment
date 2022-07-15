@@ -1,7 +1,8 @@
 
+const { optional } = require('@hapi/joi/lib/base');
 const mongoose=require('mongoose')
 
-// Creating checklistSchema using mongoose schema
+// create checklistSchema using mongoose schema
 const checklistSchema = new mongoose.Schema({
     isExist:
     {
@@ -22,14 +23,18 @@ const checklistSchema = new mongoose.Schema({
     {
         data: Buffer,
         contentType: String
+    },
+    summary:
+    {
+        type:String
     }
   
   });
  
-  //Set the schema in mongoose model
+  //set the schema in mongoose model
   const checklist=mongoose.model('Checklist',checklistSchema)
 
-  //Export model for  further use
+  //export model for  further use
   module.exports=checklist
 
 

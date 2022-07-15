@@ -1,8 +1,7 @@
 const mongoose = require("mongoose");
-
 const Schema = mongoose.Schema;
 
-//create Schema
+// Create OrderSchema using mongoose schema
 const OrderSchema = new Schema({
   orderName: {
     type: String,
@@ -26,5 +25,5 @@ const OrderSchema = new Schema({
     required:true
   }
 });
-
+//Set and export the schema in mongoose model
 module.exports = Order = mongoose.model("Order", OrderSchema);

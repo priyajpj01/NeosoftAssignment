@@ -1,11 +1,15 @@
 const express=require('express')
 const router=express.Router()
-const { canCreateOrder,canUpdateOrder,viewStatus} = require('../permissions')
+const { canCreateOrder,canUpdateOrder,viewStatus} = require('../middleware/permissions')
 
-
-// Load User model
+// load order model
 const Order = require("../models/order");
 
+
+// @route   POST /createOrder
+// @desc    create order 
+// @access  Public
+// {role:"xxx",orderID:"xxx"}
 router.post('/createOrder',authGetOrder,async (req,res)=>
 {
     try {
@@ -23,6 +27,10 @@ router.post('/createOrder',authGetOrder,async (req,res)=>
     }
 });
 
+// @route   POST /updateOrderStatus
+// @desc    update order status
+// @access  Public
+// {role:"xxx",orderID:"xxx"}
 router.post('/updateOrderStatus',authUpdateOrder,(req,res)=>
 {
 Order.findOneAndUpdate({orderID: req.body.orderID}, 
@@ -35,7 +43,11 @@ Order.findOneAndUpdate({orderID: req.body.orderID},
         }
     });
 })
-    
+  
+// @route   GET /getOrderStatus
+// @desc    fetch order status
+// @access  Public
+// {role:"xxx",orderID:"xxx"}
 router.get('/getOrderStatus',authStatusOfOrder,(req,res)=>
 {
    
@@ -50,29 +62,31 @@ router.get('/getOrderStatus',authStatusOfOrder,(req,res)=>
 })
     
 
-    
+// function to access middleware    
 function authGetOrder(req, res, next) {
     if (!canCreateOrder(req.body.role)) {
       res.status(401)
-      return res.send('Not Allowed')
+      return res.send(req.body.role+' Not Allowed to create order')
     }
   
     next()
   }
    
+  // function to access middleware  
   function authUpdateOrder(req, res, next) {
     if (!canUpdateOrder(req.body.role)) {
       res.status(401)
-      return res.send('Not Allowed')
+      return res.send(req.body.role+' Not Allowed to update order')
     }
   
     next()
   }
   
+  // function to access middleware  
   function authStatusOfOrder(req, res, next) {
     if (!viewStatus(req.body.role)) {
       res.status(401)
-      return res.send('Not Allowed')
+      return res.send(req.body.role+' Not Allowed to view status of order')
     }
   
     next()

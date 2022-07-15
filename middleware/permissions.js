@@ -1,7 +1,10 @@
-const { ROLE } = require('./data')
-// Load User model
-const User = require("./models/user")
+const { ROLE } = require('../src/data')
 
+
+// returns registeration options on the basis of roles
+// admin can create procurement manager,inspection manager and client
+// procurement manager can create inspection manager and client
+// inspection manager can't create user
 var arrOptions=[]
 function registerOptions(role) {
     if (role === ROLE.ADMIN) 
@@ -24,12 +27,14 @@ function registerOptions(role) {
    
 }
 
-
+// middleware to give access to admin and procurement manager to create user
 function canRegisterUser(role) {
     return (
         role === ROLE.PM || role===ROLE.ADMIN
       )
 }
+
+// middleware to give access to procurement manager to create order
 
 function canCreateOrder(role) {
     return (
@@ -37,6 +42,7 @@ function canCreateOrder(role) {
     )
   }
   
+// middleware to give access to admin/procurement/inspection manager to update order status
 function canUpdateOrder(role)
 {
     return (
@@ -45,6 +51,8 @@ function canUpdateOrder(role)
 
 }  
 
+// middleware to give access to admin/cleint/procurement/inspection manager to view order status
+
 function viewStatus(role)
 {
     return (
@@ -52,26 +60,18 @@ function viewStatus(role)
 
 }  
 
-async function scopedUser(role) {
-    var filter
-    console.log(role)
+// middleware to give access to admin/cleint/procurement/inspection manager to view other users basis on roles
+
+function scopedUser(role) {
+    var filter={}
     if (role === ROLE.ADMIN) 
-        filter={}
+        return filter
     else
     {
-        filter={}
         filter.owner=role 
+        return filter
     }
-         
-   try {
-        const users = await User.findOne({userID:"12222@gmail.com"})
-        if (!users) {
-            return res.status(404).send()
-        }
-        console.log(users)
-        return users
-    } catch (e) {
-  }
+        
 }
 
 module.exports = {
